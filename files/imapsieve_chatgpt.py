@@ -39,7 +39,7 @@ def decode_mail(email_data):
     return from_name, from_email, to_email, subject, body
 
 def send_to_ai(from_name, subject, body):
-    openai.api_key = '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'
+    openai.api_key = '{changeapikey}'
 
     chat_models = 'gpt-3.5-turbo'
 
@@ -68,7 +68,7 @@ def create_reply(from_email, subject, body, new_msg, to_email):
     msg.attach(MIMEText(text, 'plain'))
 
     # Specify the location of the user's draft directory in Dovecot
-    draft_dir = f"/home/vontainment/mail/{domain}/{user_email}/.Drafts/cur"
+    draft_dir = f"/home/{changeusername}/mail/{domain}/{user_email}/.Drafts/cur"
     draft_filename = f"{user_email}-draft-{str(int(time.time()))}.eml"
 
     # Ensure the draft directory exists
