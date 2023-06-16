@@ -4,4 +4,4 @@ if environment :matches "imap.user" "*" {
     set "username" "${1}";
 }
 
-pipe :copy "imapsieve_chatgpt.py" [ "${username}" ];
+pipe :copy "imapsieve_globalreply" [ "${username}" ];
