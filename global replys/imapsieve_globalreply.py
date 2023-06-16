@@ -39,11 +39,11 @@ def decode_mail(email_data):
     return from_name, from_email, to_email, subject, body
 
 def send_to_ai(from_name, subject, body):
-    openai.api_key = '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'
+    openai.api_key = '{CHANGEME}'
 
     chat_models = 'gpt-3.5-turbo'
 
-    system_message = "You are an VonAI and are tasked with writing replies to emails. Write your replies as if you were a human and in the following format:\nHello FROM NAME,\n\nYOUR REPLY\n\nBest regards,\nVonAI by Vontainment"
+    system_message = "You are an AI and are tasked with writing replies to emails. Write your replies as if you were the human to whom the email was sent and in the following format:\nHello FROM NAME,\n\nYOUR REPLY\n\nBest regards"
     user_message = f"This email is from:{from_name}. This email has a subject of: {subject}. This email's body is: {body}"
 
     result = openai.ChatCompletion.create(
@@ -68,7 +68,7 @@ def create_reply(from_email, subject, body, new_msg, to_email):
     msg.attach(MIMEText(text, 'plain'))
 
     # Specify the location of the user's draft directory in Dovecot
-    draft_dir = f"/home/vontainment/mail/{domain}/{user_email}/.Drafts/cur"
+    draft_dir = f"/home/{CHANGEME}/mail/{domain}/{user_email}/.Drafts/cur"
     draft_filename = f"{user_email}-draft-{str(int(time.time()))}.eml"
 
     # Ensure the draft directory exists

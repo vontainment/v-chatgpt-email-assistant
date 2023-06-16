@@ -13,9 +13,9 @@ sed -i '/mailbox Archive {/,/}/ a \
 
 sudo mkdir -p /var/mail/sieve
 
-mv ./files/imapsieve_chatgpt.py /etc/dovecot/sieve/
-mv ./files/ai_assistant.sieve /var/mail/sieve/
-mv ./files/21-ai-assistant.conf /etc/dovecot/conf/
+mv ./imapsieve_chatgpt.py /etc/dovecot/sieve/
+mv ./ai_assistant.sieve /var/mail/sieve/
+mv ./21-ai-assistant.conf /etc/dovecot/conf/
 
 
 sudo chmod 644 /etc/dovecot/conf/21-ai-assistant.conf
