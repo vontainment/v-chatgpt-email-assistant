@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
+"""
+-----------------------------------------------------------
+Script Name: ChatGPT Email Assistant
+Author: Vontainment
+Created: 2023-06-16
+Updated: 2023-06-16
+
+Description:
+This script is part of a project to automate email responses
+using OpenAI's GPT-3 model. It takes an email as input and drafts
+a reply based on the content of the email, storing the drafted
+email into a specified location.
+-----------------------------------------------------------
+"""
 
 import os
+import re
 import sys
 sys.executable = '/usr/bin/python3'
 import base64
@@ -14,6 +29,38 @@ from email.generator import Generator
 from io import BytesIO
 
 USER = sys.argv[1]
+user_email, domain = USER.split('@')
+
+def get_nixuser_from_conf(domain):
+    # Read the domain's .conf file
+    with open(f'/etc/dovecot/conf.d/domains/{domain}.conf', 'r') as f:
+        conf_file_content = f.read()
+
+    # Use a regular expression to find the directory after /home/
+    match = re.search(r'/home/([^/]+)', conf_file_content)
+    if match:
+        return match.group(1)  # Return the matched directory name
+    else:
+        raise Exception(f"Could not find directory after /home/ in {domain}.conf")
+
+nixuser = get_nixuser_from_conf(domain)
+
+def get_config_values(nixuser):
+    # Read the user's ai.conf file
+    with open(f'/home/{nixuser}/mail/ai.conf', 'r') as f:
+        ai_conf_content = f.read()
+
+    # Use regular expressions to find the user key and instructions
+    userkey_match = re.search(r'userkey="([^"]*)"', ai_conf_content)
+    instructions_match = re.search(r'instructions="([^"]*)"', ai_conf_content)
+
+    if userkey_match and instructions_match:
+        # Return the matched user key and instructions
+        return userkey_match.group(1), instructions_match.group(1)
+    else:
+        raise Exception("Could not find userkey or instructions in ai.conf")
+
+userkey, instructions = get_config_values(nixuser)
 
 def decode_mail(email_data):
     msg = email.message_from_bytes(email_data)
@@ -39,11 +86,12 @@ def decode_mail(email_data):
     return from_name, from_email, to_email, subject, body
 
 def send_to_ai(from_name, subject, body):
-    openai.api_key = '{changeapikey}'
+    openai.api_key = userkey
 
     chat_models = 'gpt-3.5-turbo'
 
     system_message = "You are an AI and are tasked with writing replies to emails. Write your replies as if you were the human to whom the email was sent and in the following format:\nHello FROM NAME,\n\nYOUR REPLY\n\nBest regards"
+    system_message = f"{instructions}"
     user_message = f"This email is from:{from_name}. This email has a subject of: {subject}. This email's body is: {body}"
 
     result = openai.ChatCompletion.create(
@@ -58,7 +106,6 @@ def send_to_ai(from_name, subject, body):
 def create_reply(from_email, subject, body, new_msg, to_email):
     re_subject = "Re: " + subject
     text = new_msg + "\n\n" + body
-    user_email, domain = USER.split('@')
 
     msg = MIMEMultipart()
     msg['From'] = to_email
@@ -68,7 +115,7 @@ def create_reply(from_email, subject, body, new_msg, to_email):
     msg.attach(MIMEText(text, 'plain'))
 
     # Specify the location of the user's draft directory in Dovecot
-    draft_dir = f"/home/{changeusername}/mail/{domain}/{user_email}/.Drafts/cur"
+    draft_dir = f"/home/{nixuser}/mail/{domain}/{user_email}/.Drafts/cur"
     draft_filename = f"{user_email}-draft-{str(int(time.time()))}.eml"
 
     # Ensure the draft directory exists
