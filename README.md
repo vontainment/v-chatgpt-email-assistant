@@ -1,3 +1,5 @@
+![Header](./20230619_031337_0000.png)
+
 # v-chatgpt-email-assistant
 Easy email rerplies by ChatGPT. Creates an AI Assistant folder that you can move mail to. Once mail has been moved there it'll be processed for a reply, and then the reply will be placed in the draft folder. Prompt and api key is global except in the beta version. The AI Prompt and API keys can we set per user in our beta version. WIP!
 
